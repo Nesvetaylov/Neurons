@@ -1,0 +1,176 @@
+метод Ньютона:
+
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+double f(double x1, double x2) {
+    return x1 * x1 + 8 * x2 * x2 - x1 * x2 + x1; // Примерная функция
+}
+
+double dfx1(double x1, double x2) {
+    return 2 * x1 - x2 + 1; // производная f по x1
+}
+
+double dfx2(double x1, double x2) {
+    return 16 * x2 - x1; // производная f по x2
+}
+
+int main() {
+    double x[2] = {1.5, 0.1};
+    double dx[2], dk[2];
+    double newx[2];
+    double Hrev[4] = {0.51613, 0.03125, 0.03125, 0.0625};
+    double E1 = 0.1, E2 = 0.15;
+    int M = 10;
+    int k = 0, iter = -1;
+    bool flag = false;
+    string reason = "";
+
+    while (true) {
+        cout << "Ank = " << k;
+        cout << " Anx" << k << " = (" << x[0] << ", " << x[1] << ")\n";
+
+        dx[0] = dfx1(x[0], x[1]);
+        dx[1] = dfx2(x[0], x[1]);
+
+        if (sqrt(dx[0] * dx[0] + dx[1] * dx[1]) < E1) {
+            if (flag == true && iter == k - 1) {
+                reason = "Достигнута точность по норме градиента (< E1)";
+                break;
+            }
+            flag = true;
+            iter = k;
+        }
+        if (k >= M) {
+            if (flag == true && iter == k - 1) {
+                reason = "Достигнуто максимальное количество итераций (M)";
+                break;
+            }
+            flag = true;
+            iter = k;
+        }
+
+        if (Hrev[0] * Hrev[3] - Hrev[2] * Hrev[1] > 0) {
+            dk[0] = -1 * (Hrev[0] * dx[0] + Hrev[1] * dx[1]);
+            dk[1] = -1 * (Hrev[2] * dx[0] + Hrev[3] * dx[1]);
+        } else {
+            dk[0] = -1 * dx[0];
+            dk[1] = -1 * dx[1];
+        }
+
+        newx[0] = x[0] + dk[0];
+        newx[1] = x[1] + dk[1];
+
+        if (sqrt(pow(newx[0] - x[0], 2) + pow(newx[1] - x[1], 2)) < E2) {
+            if (abs(f(newx[0], newx[1]) - f(x[0], x[1])) < E2) {
+                x[0] = newx[0];
+                x[1] = newx[1];
+                if (flag == true && iter == k - 1) {
+                    reason = "Достигнута сходимость по изменениям переменных и функции (< E2)";
+                    break;
+                }
+                flag = true;
+                iter = k;
+            }
+        }
+
+        x[0] = newx[0];
+        x[1] = newx[1];
+        k = k + 1;
+    }
+
+    cout << "\nКоличество итераций: " << k;
+    cout << "\nAnx = (" << x[0] << ", " << x[1] << ")\n";
+    cout << "f(x) = " << f(x[0], x[1]) << endl;
+    cout << "Причина остановки: " << reason << endl;
+
+    return 0;
+}
+
+Равсон
+
+#include <iostream>  
+#include <cmath>     
+using namespace std;
+
+double f(double x1, double x2) {
+    return x1 * x1 + 8 * x2 * x2 - x1 * x2 + x1; 
+}
+
+double dfx1(double x1, double x2) {
+    return 2 * x1 - x2 + 1;
+}
+
+double dfx2(double x1, double x2) {
+    return 16 * x2 - x1;
+}
+
+double t_k(double x1, double x2, double d1, double d2) {
+    return (-2 * x1 * d1 + x2 * d1 - d1 - 16 * x2 * d2 + x1 * d2) / (2 * d1 * d1 + 16 * d2 * d2 - 2 * d1 * d2);
+}
+
+int main() {
+    double x[2] = {1.5, 0.1};
+    double dx[2], dk[2];
+    double newx[2];
+    double Hrev[4] = {0.51613, 0.03125, 0.03125, 0.0625};
+    double E1 = 0.1, E2 = 0.15;
+    int M = 10;
+    int k = 0, iter = -2;
+    bool flag = false;
+    string reason = "";
+
+    while (true) {
+        cout << " Ank = " << k;
+        cout << " Anx" << k << " = (" << x[0] << ", " << x[1] << ")\n";
+
+        dx[0] = dfx1(x[0], x[1]);
+        dx[1] = dfx2(x[0], x[1]);
+
+        if (sqrt(dx[0] * dx[0] + dx[1] * dx[1]) < E1 || k >= M) {
+            if (flag == true && iter == k - 1)
+                break;
+            flag = true;
+            iter = k;
+            if (sqrt(dx[0] * dx[0] + dx[1] * dx[1]) < E1)
+                reason = "Выполнено условие ||grad f(x)|| < E1";
+            else if (k >= M)
+                reason = "Достигнуто максимальное число итераций";
+        }
+
+        if (Hrev[0] * Hrev[3] - Hrev[2] * Hrev[1] > 0) {
+            dk[0] = -1 * (Hrev[0] * dx[0] + Hrev[1] * dx[1]);
+            dk[1] = -1 * (Hrev[2] * dx[0] + Hrev[3] * dx[1]);
+        } else {
+            dk[0] = -1 * dx[0];
+            dk[1] = -1 * dx[1];
+        }
+
+        newx[0] = x[0] + t_k(x[0], x[1], dk[0], dk[1]) * dk[0];
+        newx[1] = x[1] + t_k(x[0], x[1], dk[0], dk[1]) * dk[1];
+
+        if (sqrt(pow(newx[0] - x[0], 2) + pow(newx[1] - x[1], 2)) < E2) {
+            if (abs(f(newx[0], newx[1]) - f(x[0], x[1])) < E2) {
+                x[0] = newx[0];
+                x[1] = newx[1];
+                if (flag == true && iter == k - 1)
+                    break;
+                flag = true;
+                iter = k;
+                reason = "Выполнены условия по норме изменения точки и функции < E2";
+            }
+        }
+
+        x[0] = newx[0];
+        x[1] = newx[1];
+        k = k + 1;
+    }
+
+    cout << "\nКоличество итераций: " << k;
+    cout << "\nРезультат: x = (" << x[0] << ", " << x[1] << ")";
+    cout << "\nf(x) = " << f(x[0], x[1]);
+    cout << "\nПричина остановки алгоритма: " << reason << endl;
+
+    return 0;
+}
