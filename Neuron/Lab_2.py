@@ -9,11 +9,9 @@ X = np.array([
 
 y = np.array([0, 1, 1, 0])
 
-# Функция ReLU
 def relu(v):
     return np.maximum(0, v)
 
-# Вычисление двух скрытых признаков с ReLU
 def hidden_features(x):
     h1 = relu(x[0] + x[1] - 1)
     h2 = relu(-x[0] - x[1] + 1)
@@ -73,7 +71,6 @@ def train_adaline(data, learning_rate=0.1, epochs=100):
             weights = [w + learning_rate * error * xi for w, xi in zip(weights, x)]
     return weights
 
-# Оценка точности
 def evaluate(weights, data, activation_fn):
     correct = 0
     for inputs, label in data:
@@ -155,22 +152,18 @@ learning_rate = 0.5
 epochs = 10000
 
 for epoch in range(epochs):
-    # Прямой проход
     hidden_input = np.dot(X, weights_input_hidden)
     hidden_output = sigmoid(hidden_input)
 
     final_input = np.dot(hidden_output, weights_hidden_output)
     final_output = sigmoid(final_input)
 
-    # Ошибка
     output_error = y - final_output
     output_delta = output_error * sigmoid_derivative(final_output)
 
-    # Ошибка скрытого слоя
     hidden_error = output_delta.dot(weights_hidden_output.T)
     hidden_delta = hidden_error * sigmoid_derivative(hidden_output)
 
-    # Обновление весов
     weights_hidden_output += hidden_output.T.dot(output_delta) * learning_rate
     weights_input_hidden += X.T.dot(hidden_delta) * learning_rate
 
@@ -183,13 +176,11 @@ def predict(x):
     out = sigmoid(np.dot(h, weights_hidden_output))
     return out
 
-# Тест без шума
 print("\nРаспознавание обучающих образов:")
 for i, sample in enumerate(X):
     res = predict(sample)
     print(f"Образ {i}: сеть выдала {res.round()} (ожидалось {y[i]})")
 
-# Тест с шумом: шумный образ I (010110010 вместо 010010010)
 noisy_I = np.array([0,1,0,1,1,0,0,1,0])
 res_noisy = predict(noisy_I)
 print("\nРаспознавание шумного образа I:")
