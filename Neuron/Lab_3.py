@@ -57,7 +57,7 @@ n_epochs = 6
 
 
 import random
-random.seed(42)  # для воспроизводимости
+random.seed(42)  
 
 weights = []
 for _ in range(n_neurons):
@@ -72,7 +72,6 @@ def euclidean_distance(vec1, vec2):
         s += (vec1[i] - vec2[i]) ** 2
     return s ** 0.5
 
-# 6. Обучение сети Кохонена
 for epoch in range(n_epochs):
     lr = learning_rate_0 * (1 - epoch / n_epochs) 
     for obj in data_norm:
